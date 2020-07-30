@@ -3,7 +3,6 @@ package net.devtech.arrp.util;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.jetbrains.annotations.NotNull;
 
 public class CountingInputStream extends InputStream {
 	private final InputStream input;
@@ -21,7 +20,7 @@ public class CountingInputStream extends InputStream {
 	}
 
 	@Override
-	public int read(@NotNull byte[] b, int off, int len) throws IOException {
+	public int read(byte[] b, int off, int len) throws IOException {
 		int read = this.input.read(b, off, len);
 		if (read != -1) {
 			this.read += read;

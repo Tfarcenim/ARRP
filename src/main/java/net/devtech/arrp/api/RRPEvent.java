@@ -1,19 +1,19 @@
 package net.devtech.arrp.api;
 
-import net.minecraft.resources.ResourcePack;
+import net.minecraft.resources.IResourcePack;
 import net.minecraftforge.eventbus.api.Event;
 
 import java.util.List;
 
 public class RRPEvent extends Event {
 
-	public final List<ResourcePack> packs;
+	public final List<IResourcePack> packs;
 
-	public RRPEvent(List<ResourcePack> pack) {
+	public RRPEvent(List<IResourcePack> pack) {
 		this.packs = pack;
 	}
 
-	public void insert(List<ResourcePack> resources) {
+	public void insert(List<IResourcePack> resources) {
 		packs.addAll(resources);
 	}
 }

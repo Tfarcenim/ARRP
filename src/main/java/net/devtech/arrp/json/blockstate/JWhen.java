@@ -10,11 +10,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import net.minecraft.util.Tuple;
 
-import net.minecraft.util.Pair;
 
 public class JWhen implements Cloneable {
-	private final List<Pair<String, String[]>> OR = new ArrayList<>();
+	private final List<Tuple<String, String[]>> OR = new ArrayList<>();
 
 	/**
 	 * @see JState#when()
@@ -22,7 +22,7 @@ public class JWhen implements Cloneable {
 	public JWhen() {}
 
 	public JWhen add(String condition, String... states) {
-		this.OR.add(new Pair<>(condition, states));
+		this.OR.add(new Tuple<>(condition, states));
 		return this;
 	}
 
@@ -40,14 +40,14 @@ public class JWhen implements Cloneable {
 		public JsonElement serialize(JWhen src, Type typeOfSrc, JsonSerializationContext context) {
 			if (src.OR.size() == 1) {
 				JsonObject json = new JsonObject();
-				Pair<String, String[]> val = src.OR.get(0);
-				json.addProperty(val.getLeft(), String.join("|", Arrays.asList(val.getRight())));
+				Tuple<String, String[]> val = src.OR.get(0);
+				json.addProperty(val.getA(), String.join("|", Arrays.asList(val.getB())));
 				return json;
 			} else {
 				JsonArray array = new JsonArray();
-				for (Pair<String, String[]> val : src.OR) {
+				for (Tuple<String, String[]> val : src.OR) {
 					JsonObject json = new JsonObject();
-					json.addProperty(val.getLeft(), String.join("|", Arrays.asList(val.getRight())));
+					json.addProperty(val.getA(), String.join("|", Arrays.asList(val.getB())));
 					array.add(json);
 				}
 				return array;

@@ -1,6 +1,7 @@
 package net.devtech.arrp.json.models;
 
-import net.minecraft.util.math.Direction;
+
+import net.minecraft.util.Direction;
 
 public class JRotation {
 	private final float[] origin = new float[3];
@@ -12,7 +13,7 @@ public class JRotation {
 	 * @see JModel#rotation(Direction.Axis)
 	 */
 	public JRotation(Direction.Axis axis) {
-		this.axis = axis.asString()
+		this.axis = axis.getString()
 		                .charAt(0);
 	}
 

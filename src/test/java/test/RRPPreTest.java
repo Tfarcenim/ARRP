@@ -8,7 +8,7 @@ import net.devtech.arrp.json.blockstate.JVariant;
 import net.devtech.arrp.json.blockstate.JWhen;
 import net.devtech.arrp.json.models.JModel;
 import net.devtech.arrp.json.models.JTextures;
-import net.minecraft.util.math.Direction;
+import net.minecraft.util.Direction;
 
 import static net.devtech.arrp.json.blockstate.JState.*;
 import static net.devtech.arrp.json.models.JModel.model;

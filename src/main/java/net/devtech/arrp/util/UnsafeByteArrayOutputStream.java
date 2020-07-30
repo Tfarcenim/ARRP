@@ -3,8 +3,6 @@ package net.devtech.arrp.util;
 import java.io.OutputStream;
 import java.util.Arrays;
 
-import org.jetbrains.annotations.NotNull;
-
 public class UnsafeByteArrayOutputStream extends OutputStream implements AutoCloseable {
 	protected byte[] buf;
 	protected int index;
@@ -35,7 +33,7 @@ public class UnsafeByteArrayOutputStream extends OutputStream implements AutoClo
 	}
 
 	@Override
-	public void write(@NotNull byte b[], int off, int len) {
+	public void write(byte b[], int off, int len) {
 		if ((off < 0) || (off > b.length) || (len < 0) || ((off + len) - b.length > 0)) {
 			throw new IndexOutOfBoundsException();
 		}

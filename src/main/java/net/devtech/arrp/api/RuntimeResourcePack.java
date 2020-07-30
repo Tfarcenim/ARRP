@@ -20,6 +20,7 @@ import net.devtech.arrp.util.CallableFunction;
 
 import net.minecraft.resources.IResourcePack;
 import net.minecraft.resources.ResourcePack;
+import net.minecraft.resources.ResourcePackType;
 import net.minecraft.util.ResourceLocation;
 
 /**
@@ -69,17 +70,17 @@ public interface RuntimeResourcePack extends IResourcePack {
 	 *
 	 * @see #async(Consumer)
 	 */
-	Future<byte[]> addAsyncResource(ResourceType type, ResourceLocation identifier, CallableFunction<ResourceLocation, byte[]> data);
+	Future<byte[]> addAsyncResource(ResourcePackType type, ResourceLocation identifier, CallableFunction<ResourceLocation, byte[]> data);
 
 	/**
 	 * add a resource that is lazily evaluated
 	 */
-	void addLazyResource(ResourceType type, ResourceLocation path, BiFunction<RuntimeResourcePack, ResourceLocation, byte[]> data);
+	void addLazyResource(ResourcePackType type, ResourceLocation path, BiFunction<RuntimeResourcePack, ResourceLocation, byte[]> data);
 
 	/**
 	 * add a raw resource
 	 */
-	byte[] addResource(ResourceType type, ResourceLocation path, byte[] data);
+	byte[] addResource(ResourcePackType type, ResourceLocation path, byte[] data);
 
 	/**
 	 * add a clientside resource
@@ -143,7 +144,7 @@ public interface RuntimeResourcePack extends IResourcePack {
 	 * <p>
 	 * calling an this function from itself will result in a infinite loop
 	 *
-	 * @see #addAsyncResource(ResourceType, ResourceLocation, CallableFunction)
+	 * @see #addAsyncResource(ResourcePackType, ResourceLocation, CallableFunction)
 	 */
 	Future<?> async(Consumer<RuntimeResourcePack> action);
 

@@ -9,8 +9,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.Direction;
+import net.minecraft.util.Direction;
+import net.minecraft.util.IStringSerializable;
+
 
 public final class JVariant implements Cloneable {
 	private final Map<String, JBlockModel> models = new HashMap<>();
@@ -46,8 +47,8 @@ public final class JVariant implements Cloneable {
 	 *
 	 * @see Direction
 	 */
-	public JVariant put(String property, StringIdentifiable value, JBlockModel builder) {
-		this.models.put(property + '=' + value.asString(), builder);
+	public JVariant put(String property, IStringSerializable value, JBlockModel builder) {
+		this.models.put(property + '=' + value.getString(), builder);
 		return this;
 	}
 

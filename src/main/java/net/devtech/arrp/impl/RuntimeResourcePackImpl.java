@@ -58,16 +58,16 @@ import net.devtech.arrp.util.CallableFunction;
 import net.devtech.arrp.util.CountingInputStream;
 import net.devtech.arrp.util.UnsafeByteArrayOutputStream;
 
-import net.minecraft.resource.ResourcePack;
-import net.minecraft.resource.ResourceType;
-import net.minecraft.resource.metadata.ResourceMetadataReader;
+import net.minecraft.resources.IResourcePack;
+import net.minecraft.resources.ResourcePackType;
+import net.minecraft.resources.data.IMetadataSectionSerializer;
 import net.minecraft.util.ResourceLocation;
 
 
 /**
  * @see RuntimeResourcePack
  */
-public class RuntimeResourcePackImpl implements RuntimeResourcePack, ResourcePack {
+public class RuntimeResourcePackImpl implements RuntimeResourcePack, IResourcePack {
 	public static final ExecutorService EXECUTOR_SERVICE;
 	public static final boolean DUMP;
 	public static final boolean DEBUG_PERFORMANCE;
@@ -141,7 +141,7 @@ public class RuntimeResourcePackImpl implements RuntimeResourcePack, ResourcePac
 
 	@Override
 	public void addRecoloredImage(ResourceLocation identifier, InputStream target, IntUnaryOperator operator) {
-		this.addLazyResource(ResourceType.CLIENT_RESOURCES, fix(identifier, "textures", "png"), (i, r) -> {
+		this.addLazyResource(ResourcePackType.CLIENT_RESOURCES, fix(identifier, "textures", "png"), (i, r) -> {
 			try {
 
 				// optimize buffer allocation, input and output image after recoloring should be roughly the same size
@@ -176,7 +176,7 @@ public class RuntimeResourcePackImpl implements RuntimeResourcePack, ResourcePac
 	}
 
 	@Override
-	public Future<byte[]> addAsyncResource(ResourceType type, ResourceLocation path, CallableFunction<ResourceLocation, byte[]> data) {
+	public Future<byte[]> addAsyncResource(ResourcePackType type, ResourceLocation path, CallableFunction<ResourceLocation, byte[]> data) {
 		Future<byte[]> future = EXECUTOR_SERVICE.submit(() -> data.get(path));
 		this.getSys(type)
 		    .put(path, () -> {
@@ -190,7 +190,7 @@ public class RuntimeResourcePackImpl implements RuntimeResourcePack, ResourcePac
 	}
 
 	@Override
-	public void addLazyResource(ResourceType type, ResourceLocation path, BiFunction<RuntimeResourcePack, ResourceLocation, byte[]> func) {
+	public void addLazyResource(ResourcePackType type, ResourceLocation path, BiFunction<RuntimeResourcePack, ResourceLocation, byte[]> func) {
 		this.getSys(type)
 		    .put(path, new Supplier<byte[]>() {
 			    private byte[] data;
@@ -207,7 +207,7 @@ public class RuntimeResourcePackImpl implements RuntimeResourcePack, ResourcePac
 
 
 	@Override
-	public byte[] addResource(ResourceType type, ResourceLocation path, byte[] data) {
+	public byte[] addResource(ResourcePackType type, ResourceLocation path, byte[] data) {
 		this.getSys(type)
 		    .put(path, () -> data);
 		return data;
@@ -215,12 +215,12 @@ public class RuntimeResourcePackImpl implements RuntimeResourcePack, ResourcePac
 
 	@Override
 	public byte[] addAsset(ResourceLocation path, byte[] data) {
-		return this.addResource(ResourceType.CLIENT_RESOURCES, path, data);
+		return this.addResource(ResourcePackType.CLIENT_RESOURCES, path, data);
 	}
 
 	@Override
 	public byte[] addData(ResourceLocation path, byte[] data) {
-		return this.addResource(ResourceType.SERVER_DATA, path, data);
+		return this.addResource(ResourcePackType.SERVER_DATA, path, data);
 	}
 
 	@Override
@@ -325,8 +325,8 @@ public class RuntimeResourcePackImpl implements RuntimeResourcePack, ResourcePac
 		return new ResourceLocation(identifier.getNamespace(), prefix + '/' + identifier.getPath() + '.' + append);
 	}
 
-	private Map<ResourceLocation, Supplier<byte[]>> getSys(ResourceType side) {
-		return side == ResourceType.CLIENT_RESOURCES ? this.assets : this.data;
+	private Map<ResourceLocation, Supplier<byte[]>> getSys(ResourcePackType side) {
+		return side == ResourcePackType.CLIENT_RESOURCES ? this.assets : this.data;
 	}
 
 	/**
@@ -336,7 +336,7 @@ public class RuntimeResourcePackImpl implements RuntimeResourcePack, ResourcePac
 	 * @return the pack.png image as a stream
 	 */
 	@Override
-	public InputStream openRoot(String fileName) {
+	public InputStream getRootResourceStream(String fileName) {
 		if (!fileName.contains("/") && !fileName.contains("\\")) {
 			return ARRP.class.getResourceAsStream("/resource/" + fileName);
 		} else {
@@ -345,7 +345,7 @@ public class RuntimeResourcePackImpl implements RuntimeResourcePack, ResourcePac
 	}
 
 	@Override
-	public InputStream open(ResourceType type, ResourceLocation id) {
+	public InputStream getResourceStream(ResourcePackType type, ResourceLocation id) {
 		this.lock();
 		Supplier<byte[]> supplier = this.getSys(type)
 		                                .get(id);
@@ -360,7 +360,7 @@ public class RuntimeResourcePackImpl implements RuntimeResourcePack, ResourcePac
 
 
 	@Override
-	public Collection<ResourceLocation> findResources(ResourceType type, String namespace, String prefix, int maxDepth, Predicate<String> pathFilter) {
+	public Collection<ResourceLocation> getAllResourceLocations(ResourcePackType type, String namespace, String prefix, int maxDepth, Predicate<String> pathFilter) {
 		this.lock();
 		Set<ResourceLocation> identifiers = new HashSet<>();
 		for (ResourceLocation identifier : this.getSys(type)
@@ -376,7 +376,7 @@ public class RuntimeResourcePackImpl implements RuntimeResourcePack, ResourcePac
 	}
 
 	@Override
-	public boolean contains(ResourceType type, ResourceLocation id) {
+	public boolean resourceExists(ResourcePackType type, ResourceLocation id) {
 		this.lock();
 		boolean contains = this.getSys(type)
 		                       .containsKey(id);
@@ -385,7 +385,7 @@ public class RuntimeResourcePackImpl implements RuntimeResourcePack, ResourcePac
 	}
 
 	@Override
-	public Set<String> getNamespaces(ResourceType type) {
+	public Set<String> getResourceNamespaces(ResourcePackType type) {
 		this.lock();
 		Set<String> namespaces = new HashSet<>();
 		for (ResourceLocation identifier : this.getSys(type)
@@ -398,16 +398,16 @@ public class RuntimeResourcePackImpl implements RuntimeResourcePack, ResourcePac
 
 	// if it works, don't touch it
 	@Override
-	public <T> T parseMetadata(ResourceMetadataReader<T> metaReader) {
-		if (metaReader.getKey()
+	public <T> T getMetadata(IMetadataSectionSerializer<T> metaReader) {
+		if (metaReader.getSectionName()
 		              .equals("pack")) {
 			JsonObject object = new JsonObject();
 			object.addProperty("pack_format", this.packVersion);
 			object.addProperty("description", "runtime resource pack");
-			return metaReader.fromJson(object);
+			return metaReader.deserialize(object);
 		}
-		LOGGER.info("'" + metaReader.getKey() + "' is an unsupported metadata key!");
-		return metaReader.fromJson(new JsonObject());
+		LOGGER.info("'" + metaReader.getSectionName() + "' is an unsupported metadata key!");
+		return metaReader.deserialize(new JsonObject());
 	}
 
 	@Override

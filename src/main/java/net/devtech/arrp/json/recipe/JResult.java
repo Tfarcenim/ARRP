@@ -11,7 +11,7 @@ public class JResult {
     }
 
     public static JResult item(final Item item) {
-        return result(Registry.ITEM.getId(item).toString());
+        return result(Registry.ITEM.getKey(item).toString());
     }
 
     public static JResult result(final String id) {
@@ -19,7 +19,7 @@ public class JResult {
     }
 
     public static JStackedResult itemStack(final Item item, final int count) {
-        return stackedResult(Registry.ITEM.getId(item).toString(), count);
+        return stackedResult(Registry.ITEM.getKey(item).toString(), count);
     }
 
     public static JStackedResult stackedResult(final String id, final int count) {

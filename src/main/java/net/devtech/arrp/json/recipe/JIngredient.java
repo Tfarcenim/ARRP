@@ -22,7 +22,7 @@ public class JIngredient implements Cloneable {
     }
 
     public JIngredient item(Item item) {
-        return this.item(Registry.ITEM.getId(item).toString());
+        return this.item(Registry.ITEM.getKey(item).toString());
     }
 
     public JIngredient item(String id) {
