@@ -34,10 +34,9 @@ public abstract class ReloadableResourceManagerImplMixin {
 	private void registerARRPs(Executor prepareExecutor, Executor applyExecutor, CompletableFuture<Unit> initialStage, List<ResourcePack> packs,
 	                           CallbackInfoReturnable<IAsyncReloader> cir) {
 		LOGGER.info("ARRP register");
-		List<IResourcePack> pack = new ArrayList<>();
-		IrremovableList<IResourcePack> newPacks = new IrremovableList<>(pack, pack1 -> {
-			if (pack1 instanceof RuntimeResourcePack) {
-				((RuntimeResourcePack) pack1).dump();
+		IrremovableList<IResourcePack> newPacks = new IrremovableList<>(new ArrayList<>(), pack -> {
+			if (pack instanceof RuntimeResourcePack) {
+				((RuntimeResourcePack) pack).dump();
 			}
 		});
 		RRPEvent event = new RRPEvent(newPacks);
